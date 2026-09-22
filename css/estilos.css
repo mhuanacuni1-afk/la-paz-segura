@@ -1,0 +1,223 @@
+body {
+    background-color: #070d1b;
+    color: #ffffff;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    margin: 0;
+    padding: 10px;
+}
+
+.dashboard-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.dashboard-header {
+    background: #111b33;
+    padding: 12px 20px;
+    border-radius: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid #1f2c4c;
+}
+
+.dashboard-header h1 {
+    margin: 0;
+    font-size: 20px;
+    color: #38ef7d;
+}
+
+.dashboard-header span {
+    font-size: 11px;
+    color: #8fa1c7;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 260px 1fr 300px;
+    gap: 12px;
+}
+
+.panel {
+    background: #111b33;
+    border: 1px solid #1f2c4c;
+    border-radius: 6px;
+    padding: 12px;
+}
+
+.panel h3 {
+    margin-top: 0;
+    font-size: 13px;
+    color: #8fa1c7;
+    border-bottom: 1px solid #1f2c4c;
+    padding-bottom: 6px;
+}
+
+.control-group {
+    margin-bottom: 12px;
+    font-size: 12px;
+}
+
+.control-group label {
+    display: block;
+    color: #8fa1c7;
+    margin-bottom: 4px;
+}
+
+.control-group input, .control-group select {
+    width: 100%;
+    background: #070d1b;
+    border: 1px solid #2a3d66;
+    color: white;
+    padding: 6px;
+    border-radius: 4px;
+}
+
+.mapa-container {
+    width: 100%;
+    height: 450px;
+    background: #070d1b;
+    border-radius: 4px;
+    position: relative;
+    background-size: cover;
+    background-position: center;
+}
+
+.alerta-flotante {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    border-left: 4px solid #ff4444;
+}
+
+.matriz-content pre {
+    background: #070d1b;
+    padding: 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    color: #00f2fe;
+}
+
+/* CUADRO DINÁMICO QUE CAMBIA DE COLOR */
+.cuadro-dinamico {
+    padding: 15px;
+    border-radius: 6px;
+    text-align: center;
+    margin-top: 15px;
+    color: #000;
+    font-weight: bold;
+    transition: background 0.3s ease;
+}
+
+.cuadro-dinamico h2 {
+    margin: 5px 0;
+    font-size: 24px;
+}
+
+/* Clases de colores interactivos */
+.fondo-rojo { background-color: #ff4444; }
+.fondo-amarillo { background-color: #ffbb33; }
+.fondo-verde { background-color: #00C851; }
+
+.texto-rojo { color: #ff4444 !important; }
+.texto-amarillo { color: #ffbb33 !important; }
+.texto-verde { color: #00C851 !important; }
+.seccion-inferior {
+    margin-top: 5px;
+}
+
+.inferior-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.sub-panel {
+    background: #070d1b;
+    border: 1px solid #1f2c4c;
+    border-radius: 4px;
+    padding: 8px;
+}
+
+.sub-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 10px;
+    color: #8fa1c7;
+    margin-bottom: 6px;
+}
+
+.tag-alerta {
+    background: rgba(255, 68, 68, 0.2);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 9px;
+}
+
+.grafico-caja {
+    height: 140px;
+    background: #040812;
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 4px;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.eje-y {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    font-size: 9px;
+    color: #6174a3;
+    height: 100%;
+}
+
+.escala-mm {
+    font-size: 9px;
+    color: #8fa1c7;
+    text-align: right;
+}
+
+.barra-color span {
+    width: 8px;
+    height: 8px;
+    display: inline-block;
+    margin-right: 2px;
+}
+
+.brújula {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    font-size: 10px;
+    color: #fff;
+}
+
+/* Barra de estado inferior final */
+.status-bar-inferior {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #070d1b;
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin-top: 10px;
+    font-size: 11px;
+    color: #8fa1c7;
+    border: 1px solid #1f2c4c;
+}
+
+.sim-activa {
+    color: #38ef7d;
+    font-weight: bold;
+}

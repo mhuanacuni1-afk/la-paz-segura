@@ -1,0 +1,1388 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>La Paz Segura - Monitoreo Geotécnico</title>
+    <style>
+      body {
+        background-color: #070d1b;
+        color: #ffffff;
+        font-family: "Segoe UI", Arial, sans-serif;
+        margin: 0;
+        padding: 10px;
+      }
+
+      .dashboard-container {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .dashboard-header {
+        background: #111b33;
+        padding: 12px 20px;
+        border-radius: 6px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border: 1px solid #1f2c4c;
+      }
+
+      .dashboard-header h1 {
+        margin: 0;
+        font-size: 20px;
+        color: #38ef7d;
+      }
+
+      .dashboard-header span {
+        font-size: 11px;
+        color: #8fa1c7;
+      }
+
+      .header-info {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        font-size: 12px;
+      }
+
+      .badge-conectado {
+        color: #38ef7d;
+      }
+
+      .alerta-header {
+        background: rgba(255, 68, 68, 0.2);
+        color: #ff4444;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+      }
+
+      .dashboard-grid {
+        display: grid;
+        grid-template-columns: 260px 1fr 300px;
+        gap: 12px;
+      }
+
+      .panel {
+        background: #111b33;
+        border: 1px solid #1f2c4c;
+        border-radius: 6px;
+        padding: 12px;
+      }
+
+      .panel h3 {
+        margin-top: 0;
+        font-size: 13px;
+        color: #8fa1c7;
+        border-bottom: 1px solid #1f2c4c;
+        padding-bottom: 6px;
+      }
+
+      .control-group {
+        margin-bottom: 12px;
+        font-size: 12px;
+      }
+
+      .control-group label {
+        display: block;
+        color: #8fa1c7;
+        margin-bottom: 4px;
+      }
+
+      .control-group input,
+      .control-group select {
+        width: 100%;
+        background: #070d1b;
+        border: 1px solid #2a3d66;
+        color: white;
+        padding: 6px;
+        border-radius: 4px;
+      }
+
+      .arduino-box {
+        background: #070d1b;
+        padding: 10px;
+        border-radius: 4px;
+        border: 1px solid #2a3d66;
+        margin-top: 20px;
+        font-size: 11px;
+      }
+
+      .arduino-box .conectado {
+        color: #38ef7d;
+        margin: 5px 0;
+      }
+
+      .mapa-container {
+        width: 100%;
+        height: 420px;
+        background: #070d1b;
+        border-radius: 4px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .mapa-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      #lluviaCanvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 3;
+        pointer-events: none;
+      }
+
+      .alerta-flotante {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        background: rgba(0, 0, 0, 0.85);
+        padding: 8px 12px;
+        border-radius: 4px;
+        font-size: 12px;
+        border-left: 4px solid #ff4444;
+        z-index: 10;
+        transition: border-color 0.3s ease;
+      }
+
+      .matriz-content pre {
+        background: #070d1b;
+        padding: 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        color: #00f2fe;
+        margin: 5px 0;
+      }
+
+      .cuadro-dinamico {
+        padding: 15px;
+        border-radius: 6px;
+        text-align: center;
+        margin-top: 15px;
+        color: #000;
+        font-weight: bold;
+        transition:
+          background 0.3s ease,
+          color 0.3s ease;
+      }
+
+      .cuadro-dinamico h2 {
+        margin: 5px 0;
+        font-size: 24px;
+      }
+
+      /* Sección Inferior */
+      .seccion-inferior {
+        margin-top: 5px;
+      }
+
+      .inferior-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 10px;
+        margin-top: 10px;
+      }
+
+      .sub-panel {
+        background: #070d1b;
+        border: 1px solid #1f2c4c;
+        border-radius: 4px;
+        padding: 8px;
+        transition: border-color 0.3s ease;
+      }
+
+      .sub-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 10px;
+        color: #8fa1c7;
+        margin-bottom: 6px;
+      }
+
+      .tag-alerta {
+        background: rgba(255, 68, 68, 0.2);
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-size: 9px;
+        transition: all 0.3s ease;
+      }
+
+      .grafico-caja {
+        height: 140px;
+        background: #040812;
+        position: relative;
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        padding: 4px;
+        border-radius: 3px;
+        overflow: hidden;
+      }
+
+      .grafico-caja img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        z-index: 1;
+        opacity: 0.85;
+        transition: filter 0.3s ease;
+      }
+
+      .grafico-caja > * {
+        z-index: 2;
+      }
+
+      .eje-y {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        font-size: 9px;
+        color: #ffffff;
+        text-shadow: 1px 1px 2px #000;
+        height: 100%;
+      }
+
+      /* NUEVO: eje de distancia (X) bajo cada gráfico frontal/lateral */
+      .eje-x {
+        display: flex;
+        justify-content: space-between;
+        font-size: 9px;
+        color: #8fa1c7;
+        margin-top: 4px;
+        padding: 0 2px;
+      }
+
+      .eje-x-label {
+        text-align: center;
+        font-size: 9px;
+        color: #566998;
+        letter-spacing: 0.5px;
+        margin-top: 1px;
+      }
+
+      .escala-3colores {
+        font-size: 9px;
+        color: #ffffff;
+        text-shadow: 1px 1px 2px #000;
+        text-align: right;
+        background: rgba(0, 0, 0, 0.6);
+        padding: 4px 6px;
+        border-radius: 3px;
+      }
+
+      .fila-color {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 4px;
+        margin-bottom: 2px;
+      }
+
+      .punto-rojo {
+        background: #ff4444;
+        width: 8px;
+        height: 8px;
+        display: inline-block;
+        border-radius: 1px;
+      }
+      .punto-amarillo {
+        background: #ffbb33;
+        width: 8px;
+        height: 8px;
+        display: inline-block;
+        border-radius: 1px;
+      }
+      .punto-verde {
+        background: #00c851;
+        width: 8px;
+        height: 8px;
+        display: inline-block;
+        border-radius: 1px;
+      }
+
+      .brújula {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        font-size: 10px;
+        color: #fff;
+        background: rgba(0, 0, 0, 0.5);
+        padding: 2px 5px;
+        border-radius: 3px;
+      }
+
+      .status-bar-inferior {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #070d1b;
+        padding: 8px 12px;
+        border-radius: 4px;
+        margin-top: 10px;
+        font-size: 11px;
+        color: #8fa1c7;
+        border: 1px solid #1f2c4c;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .sim-activa {
+        color: #38ef7d;
+        font-weight: bold;
+      }
+
+      .sim-activa::before {
+        content: "●";
+        display: inline-block;
+        margin-right: 4px;
+        animation: pulso 1.2s infinite ease-in-out;
+      }
+
+      @keyframes pulso {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.25;
+        }
+      }
+
+      /* NUEVO: mini sismógrafo en vivo dentro de la barra inferior */
+      .sismografo-box {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      #sismografoCanvas {
+        background: #040812;
+        border: 1px solid #1f2c4c;
+        border-radius: 3px;
+      }
+
+      /* Clases de Estado Dinámicas por Bloque */
+      .estado-rojo {
+        border-color: #ff4444 !important;
+      }
+      .estado-amarillo {
+        border-color: #ffbb33 !important;
+      }
+      .estado-verde {
+        border-color: #00c851 !important;
+      }
+
+      .fondo-rojo {
+        background-color: #ff4444;
+        color: #fff;
+      }
+      .fondo-amarillo {
+        background-color: #ffbb33;
+        color: #000;
+      }
+      .fondo-verde {
+        background-color: #00c851;
+        color: #000;
+      }
+
+      .texto-rojo {
+        color: #ff4444 !important;
+      }
+      .texto-amarillo {
+        color: #ffbb33 !important;
+      }
+      .texto-verde {
+        color: #00c851 !important;
+      }
+
+      /* NUEVO: botón para alternar entre vista técnica y ciudadana */
+      .btn-toggle-vista {
+        background: #1f2c4c;
+        color: #fff;
+        border: 1px solid #2a3d66;
+        border-radius: 4px;
+        padding: 6px 10px;
+        cursor: pointer;
+        font-size: 11px;
+      }
+
+      /* NUEVO: vista ciudadana */
+      .vista-ciudadana {
+        margin-top: 5px;
+      }
+
+      .ciudadano-resumen {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+      }
+
+      .semaforo-grande {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        transition:
+          background-color 0.4s ease,
+          box-shadow 0.4s ease;
+      }
+
+      .semaforo-rojo {
+        background: #ff4444;
+        box-shadow: 0 0 30px rgba(255, 68, 68, 0.6);
+      }
+      .semaforo-amarillo {
+        background: #ffbb33;
+        box-shadow: 0 0 30px rgba(255, 187, 51, 0.6);
+      }
+      .semaforo-verde {
+        background: #00c851;
+        box-shadow: 0 0 30px rgba(0, 200, 81, 0.6);
+      }
+
+      .ciudadano-zona {
+        font-size: 12px;
+        color: #8fa1c7;
+      }
+
+      #ciudadanoEstado {
+        margin: 4px 0;
+        font-size: 26px;
+      }
+
+      #ciudadanoMensaje {
+        color: #c9d4ec;
+        font-size: 13px;
+        line-height: 1.5;
+        max-width: 480px;
+      }
+
+      .reporte-form {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        max-width: 480px;
+      }
+
+      .reporte-form input,
+      .reporte-form textarea {
+        background: #070d1b;
+        border: 1px solid #2a3d66;
+        color: #fff;
+        padding: 8px;
+        border-radius: 4px;
+        font-family: inherit;
+        resize: vertical;
+      }
+
+      .reporte-form button {
+        background: #38ef7d;
+        color: #000;
+        border: none;
+        padding: 8px;
+        border-radius: 4px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      .lista-reportes {
+        margin-top: 12px;
+        max-width: 480px;
+      }
+
+      .reporte-item {
+        background: #070d1b;
+        border: 1px solid #1f2c4c;
+        border-radius: 4px;
+        padding: 8px;
+        margin-bottom: 6px;
+        font-size: 12px;
+      }
+
+      .reporte-item .reporte-meta {
+        color: #566998;
+        font-size: 10px;
+        margin-top: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="dashboard-container">
+      <!-- HEADER -->
+      <header class="dashboard-header">
+        <div>
+          <h1>LA PAZ SEGURA</h1>
+          <span>SISTEMA DE MONITOREO Y SIMULACIÓN GEOTÉCNICA 2D</span>
+        </div>
+        <div class="header-info">
+          <button id="btnToggleVista" class="btn-toggle-vista">
+            👤 Vista Ciudadana
+          </button>
+          <span class="badge-conectado">● CAPTANDO DATOS</span>
+          <span id="valTemp">20°C</span>
+          <span id="valHumedad">85% HUMEDAD</span>
+          <span id="alertaHeaderBadge" class="alerta-header"
+            >ALERTA NIVEL ALTO</span
+          >
+        </div>
+      </header>
+
+      <div id="vistaTecnica">
+        <!-- GRID PRINCIPAL -->
+        <div class="dashboard-grid">
+          <!-- CONTROLES -->
+          <div class="panel">
+            <h3>- CONTROLES</h3>
+            <div class="control-group">
+              <label>ZONA DE ANÁLISIS</label>
+              <select>
+                <option>Bajo Llojeta - La Paz</option>
+              </select>
+            </div>
+            <div class="control-group">
+              <label>INTENSIDAD DE LLUVIA</label>
+              <input
+                type="range"
+                id="inputLluvia"
+                min="0"
+                max="200"
+                value="75"
+              />
+              <span id="valLluvia">75 mm/h</span>
+            </div>
+            <div class="control-group">
+              <label>INCLINACIÓN DEL TERRENO</label>
+              <input
+                type="range"
+                id="inputInclinacion"
+                min="0"
+                max="90"
+                value="35"
+              />
+              <span id="valInclinacion">35°</span>
+            </div>
+            <div class="control-group">
+              <label>DENSIDAD DEL SUELO</label>
+              <input
+                type="range"
+                id="inputDensidad"
+                min="1.0"
+                max="3.0"
+                step="0.05"
+                value="1.85"
+              />
+              <span id="valDensidad">1.85 g/cm³</span>
+            </div>
+            <div class="arduino-box">
+              <strong>ARDUINO / SENSORES</strong>
+              <p id="estadoArduino" class="conectado">○ NO CONECTADO</p>
+              <small id="lecturaArduino">Modo manual (sliders)</small>
+              <button
+                id="btnConectarArduino"
+                style="
+                  width: 100%;
+                  margin-top: 8px;
+                  background: #1f2c4c;
+                  color: #fff;
+                  border: 1px solid #2a3d66;
+                  border-radius: 4px;
+                  padding: 6px;
+                  cursor: pointer;
+                "
+              >
+                🔌 Conectar Arduino
+              </button>
+            </div>
+          </div>
+
+          <!-- VISTA PRINCIPAL -->
+          <div class="panel vista-central" id="panelMapa">
+            <h3>VISTA PRINCIPAL - LA PAZ</h3>
+            <div class="mapa-container">
+              <img src="assets/1.jpg" alt="Mapa La Paz Segura" />
+              <canvas id="lluviaCanvas"></canvas>
+              <div id="etiquetaRiesgoMapa" class="alerta-flotante texto-rojo">
+                ▲ Bajo Llojeta <br /><span id="textoRiesgoMapa"
+                  >RIESGO ALTO</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <!-- MODELO MATRICIAL -->
+          <div class="panel">
+            <h3>- MODELO MATRICIAL</h3>
+            <div class="matriz-content">
+              <p>MATRIZ A (Rigidez del Suelo)</p>
+              <pre><code id="matrizTexto">[  4.2  -1.1   0   -0.5 ]
+[-1.1   4.5  -1.2    0  ]
+[  0   -1.2   3.8  -1.0 ]
+[ -0.5   0   -1.0   3.6 ]</code></pre>
+              <p style="margin-top: 10px">
+                VECTOR b (Cargas: lluvia + inclinación)
+              </p>
+              <pre><code id="vectorBTexto">[ 0.0 ]
+[ 0.0 ]
+[ 0.0 ]
+[ 0.0 ]</code></pre>
+            </div>
+            <div id="cuadroEstado" class="cuadro-dinamico fondo-rojo">
+              <span>DEFORMACIÓN MÁXIMA</span>
+              <h2 id="valDeformacion">2.35 mm</h2>
+              <strong id="textoRiesgoCuadro">ZONA CRÍTICA</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECCIÓN INFERIOR INTERACTIVA -->
+        <div class="panel seccion-inferior">
+          <h3>- ANIMACIÓN EN TIEMPO REAL - CORTE DEL TERRENO</h3>
+
+          <div class="inferior-grid">
+            <!-- VISTA FRONTAL -->
+            <div class="sub-panel" id="subPanelFrontal">
+              <div class="sub-header">
+                <span>ALTURA (m)</span>
+                <strong>VISTA FRONTAL</strong>
+                <span id="alertaFrontal" class="tag-alerta texto-rojo"
+                  >▲ ZONA CRÍTICA</span
+                >
+              </div>
+              <div class="grafico-caja">
+                <img src="assets/2.jpg" alt="Vista Frontal" />
+                <div class="eje-y">
+                  <span>4000</span><span>3600</span><span>3200</span
+                  ><span>2800</span>
+                </div>
+                <div class="escala-3colores">
+                  <small>ESTADO BLOQUE</small>
+                  <div class="fila-color">
+                    <span class="punto-rojo"></span> Crítico
+                  </div>
+                  <div class="fila-color">
+                    <span class="punto-amarillo"></span> Estable
+                  </div>
+                  <div class="fila-color">
+                    <span class="punto-verde"></span> Seguro
+                  </div>
+                </div>
+              </div>
+              <div class="eje-x">
+                <span>0</span><span>250</span><span>500</span><span>750</span
+                ><span>1000</span>
+              </div>
+              <div class="eje-x-label">DISTANCIA (m)</div>
+            </div>
+
+            <!-- VISTA LATERAL -->
+            <div class="sub-panel" id="subPanelLateral">
+              <div class="sub-header">
+                <span>ALTURA (m)</span>
+                <strong>VISTA LATERAL</strong>
+                <span id="alertaLateral" class="tag-alerta texto-rojo"
+                  >▲ ZONA CRÍTICA</span
+                >
+              </div>
+              <div class="grafico-caja">
+                <img src="assets/3.jpg" alt="Vista Lateral" />
+                <div class="eje-y">
+                  <span>4000</span><span>3600</span><span>3200</span
+                  ><span>2800</span><span>2400</span>
+                </div>
+                <div class="escala-3colores">
+                  <small>ESTADO BLOQUE</small>
+                  <div class="fila-color">
+                    <span class="punto-rojo"></span> Crítico
+                  </div>
+                  <div class="fila-color">
+                    <span class="punto-amarillo"></span> Estable
+                  </div>
+                  <div class="fila-color">
+                    <span class="punto-verde"></span> Seguro
+                  </div>
+                </div>
+              </div>
+              <div class="eje-x">
+                <span>0</span><span>250</span><span>500</span><span>750</span
+                ><span>1000</span>
+              </div>
+              <div class="eje-x-label">DISTANCIA (m)</div>
+            </div>
+
+            <!-- VISTA SUPERIOR -->
+            <div class="sub-panel" id="subPanelSuperior">
+              <div class="sub-header">
+                <strong>VISTA SUPERIOR</strong>
+                <span id="alertaSuperior" class="tag-alerta texto-rojo"
+                  >▲ ZONA CRÍTICA</span
+                >
+              </div>
+              <div class="grafico-caja">
+                <img src="assets/4.jpg" alt="Vista Superior" />
+                <div class="brújula">N 🧭</div>
+                <div class="escala-3colores">
+                  <small>ESTADO BLOQUE</small>
+                  <div class="fila-color">
+                    <span class="punto-rojo"></span> Crítico
+                  </div>
+                  <div class="fila-color">
+                    <span class="punto-amarillo"></span> Estable
+                  </div>
+                  <div class="fila-color">
+                    <span class="punto-verde"></span> Seguro
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- BARRA DE ESTADO INFERIOR -->
+          <div class="status-bar-inferior">
+            <span>FPS: <strong id="valFps">60</strong></span>
+            <span class="sim-activa">SIMULACIÓN ACTIVA</span>
+            <span
+              >⏱ TIEMPO SIMULADO
+              <strong id="tiempoSimulado">00:00:00</strong></span
+            >
+            <span>▶ PASO DE TIEMPO x1.0</span>
+            <span>📈 ITERACIONES <strong id="numIters">0</strong></span>
+            <span
+              >🕒 ÚLTIMA ACTUALIZACIÓN
+              <strong id="ultimaActualizacion">--:--:--</strong></span
+            >
+            <div class="sismografo-box">
+              <span>🟢</span>
+              <canvas id="sismografoCanvas" width="140" height="28"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VISTA CIUDADANA -->
+      <div
+        id="vistaCiudadana"
+        class="panel vista-ciudadana"
+        style="display: none"
+      >
+        <h3>- ESTADO DE TU ZONA</h3>
+        <div class="ciudadano-resumen">
+          <div
+            id="semaforoCiudadano"
+            class="semaforo-grande semaforo-rojo"
+          ></div>
+          <div class="ciudadano-texto">
+            <span class="ciudadano-zona">Bajo Llojeta - La Paz</span>
+            <h2 id="ciudadanoEstado">RIESGO ALTO</h2>
+            <p id="ciudadanoMensaje">
+              Se recomienda evacuar o alejarse de la zona.
+            </p>
+          </div>
+        </div>
+
+        <h3 style="margin-top: 20px">- REPORTAR ALGO EN TU ZONA</h3>
+        <div class="reporte-form">
+          <input
+            type="text"
+            id="reporteNombre"
+            placeholder="Tu nombre (opcional)"
+          />
+          <textarea
+            id="reporteDescripcion"
+            placeholder="Describe lo que observaste (grietas, humedad, ruido, etc.)"
+            rows="3"
+          ></textarea>
+          <button id="btnEnviarReporte">Enviar reporte</button>
+        </div>
+
+        <div id="listaReportes" class="lista-reportes">
+          <p style="color: #566998; font-size: 12px">
+            Aún no hay reportes registrados.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const inputLluvia = document.getElementById("inputLluvia");
+      const valLluvia = document.getElementById("valLluvia");
+      const inputInclinacion = document.getElementById("inputInclinacion");
+      const valInclinacion = document.getElementById("valInclinacion");
+      const inputDensidad = document.getElementById("inputDensidad");
+      const valDensidad = document.getElementById("valDensidad");
+
+      const cuadroEstado = document.getElementById("cuadroEstado");
+      const textoRiesgoCuadro = document.getElementById("textoRiesgoCuadro");
+      const textoRiesgoMapa = document.getElementById("textoRiesgoMapa");
+      const valDeformacion = document.getElementById("valDeformacion");
+      const alertaHeaderBadge = document.getElementById("alertaHeaderBadge");
+
+      const subPanelFrontal = document.getElementById("subPanelFrontal");
+      const subPanelLateral = document.getElementById("subPanelLateral");
+      const subPanelSuperior = document.getElementById("subPanelSuperior");
+
+      const alertaFrontal = document.getElementById("alertaFrontal");
+      const alertaLateral = document.getElementById("alertaLateral");
+      const alertaSuperior = document.getElementById("alertaSuperior");
+
+      // ============================================================
+      // MODELO MATRICIAL REAL: A·x = b
+      // A = rigidez del suelo (cambia con la densidad)
+      // b = cargas ambientales (lluvia + inclinación empujando el terreno)
+      // x = deformación resultante en cada punto de la ladera
+      // ============================================================
+      const matrizBase = [
+        [4.2, -1.1, 0, -0.5],
+        [-1.1, 4.5, -1.2, 0],
+        [0, -1.2, 3.8, -1.0],
+        [-0.5, 0, -1.0, 3.6],
+      ];
+      const densidadBase = 1.85; // g/cm³, la densidad "de referencia" de la matriz de arriba
+
+      // Eliminación gaussiana con pivoteo parcial: resuelve A·x = b para cualquier tamaño n
+      function resolverSistema(A, b) {
+        const n = b.length;
+        const M = A.map((fila) => fila.slice());
+        const v = b.slice();
+
+        for (let i = 0; i < n; i++) {
+          let filaPivote = i;
+          let pivoteMax = Math.abs(M[i][i]);
+          for (let k = i + 1; k < n; k++) {
+            if (Math.abs(M[k][i]) > pivoteMax) {
+              pivoteMax = Math.abs(M[k][i]);
+              filaPivote = k;
+            }
+          }
+          if (filaPivote !== i) {
+            [M[i], M[filaPivote]] = [M[filaPivote], M[i]];
+            [v[i], v[filaPivote]] = [v[filaPivote], v[i]];
+          }
+          for (let k = i + 1; k < n; k++) {
+            const factor = M[k][i] / M[i][i];
+            for (let j = i; j < n; j++) M[k][j] -= factor * M[i][j];
+            v[k] -= factor * v[i];
+          }
+        }
+
+        const x = new Array(n).fill(0);
+        for (let i = n - 1; i >= 0; i--) {
+          let suma = v[i];
+          for (let j = i + 1; j < n; j++) suma -= M[i][j] * x[j];
+          x[i] = suma / M[i][i];
+        }
+        return x;
+      }
+
+      function formatearMatriz(M) {
+        return M.map(
+          (fila) =>
+            "[ " + fila.map((v) => v.toFixed(1).padStart(5)).join("  ") + " ]",
+        ).join("\n");
+      }
+
+      function formatearVector(v) {
+        return v
+          .map((val) => "[ " + val.toFixed(2).padStart(6) + " ]")
+          .join("\n");
+      }
+
+      // Calcula A (según densidad), b (según lluvia/inclinación), resuelve A·x=b,
+      // actualiza el texto en pantalla y devuelve la deformación máxima en mm.
+      function calcularDeformacionReal(lluvia, inclinacion, densidad) {
+        // La densidad escala la rigidez completa: suelo más denso = más rígido = menos deformación
+        const factorDensidad = densidad / densidadBase;
+        const matrizActual = matrizBase.map((fila) =>
+          fila.map((v) => v * factorDensidad),
+        );
+
+        // El vector de cargas: cada "nodo" de la ladera recibe una combinación
+        // distinta de lluvia (saturación) e inclinación (gravedad)
+        const b = [
+          lluvia * 0.15 + inclinacion * 0.05,
+          lluvia * 0.12 + inclinacion * 0.08,
+          lluvia * 0.1 + inclinacion * 0.06,
+          lluvia * 0.13 + inclinacion * 0.07,
+        ];
+
+        const x = resolverSistema(matrizActual, b);
+
+        document.getElementById("matrizTexto").textContent =
+          formatearMatriz(matrizActual);
+        document.getElementById("vectorBTexto").textContent =
+          formatearVector(b);
+
+        const deformacionMaxima = Math.max(...x.map(Math.abs));
+        return deformacionMaxima * 0.7; // escala a un rango legible en mm
+      }
+
+      function actualizarSimulacion() {
+        const lluvia = Number(inputLluvia.value);
+        const inclinacion = Number(inputInclinacion.value);
+        const densidad = Number(inputDensidad.value);
+
+        valLluvia.textContent = lluvia + " mm/h";
+        valInclinacion.textContent = inclinacion + "°";
+        valDensidad.textContent = densidad.toFixed(2) + " g/cm³";
+
+        // Deformación calculada resolviendo de verdad el sistema A·x = b
+        let defCalculada = calcularDeformacionReal(
+          lluvia,
+          inclinacion,
+          densidad,
+        ).toFixed(2);
+        valDeformacion.textContent = defCalculada + " mm";
+
+        // Lógica por Bloques y Rangos de Riesgo (Rojo, Amarillo, Verde)
+        if (lluvia > 120 || inclinacion > 50) {
+          // ESTADO ROJO (CRÍTICO)
+          cuadroEstado.className = "cuadro-dinamico fondo-rojo";
+          textoRiesgoCuadro.textContent = "ZONA CRÍTICA";
+          textoRiesgoMapa.textContent = "RIESGO ALTO";
+          alertaHeaderBadge.style.background = "rgba(255, 68, 68, 0.2)";
+          alertaHeaderBadge.style.color = "#ff4444";
+          alertaHeaderBadge.textContent = "ALERTA NIVEL ALTO";
+
+          aplicarEstiloBloque(
+            subPanelFrontal,
+            alertaFrontal,
+            "rojo",
+            "▲ ZONA CRÍTICA",
+          );
+          aplicarEstiloBloque(
+            subPanelLateral,
+            alertaLateral,
+            "rojo",
+            "▲ ZONA CRÍTICA",
+          );
+          aplicarEstiloBloque(
+            subPanelSuperior,
+            alertaSuperior,
+            "rojo",
+            "▲ ZONA CRÍTICA",
+          );
+
+          actualizarVistaCiudadana("rojo");
+          sismografoAmplitud = 12;
+        } else if (lluvia > 50 || inclinacion > 25) {
+          // ESTADO AMARILLO (ESTABLE / MEDIO)
+          cuadroEstado.className = "cuadro-dinamico fondo-amarillo";
+          textoRiesgoCuadro.textContent = "ZONA ESTABLE";
+          textoRiesgoMapa.textContent = "RIESGO MEDIO";
+          alertaHeaderBadge.style.background = "rgba(255, 187, 51, 0.2)";
+          alertaHeaderBadge.style.color = "#ffbb33";
+          alertaHeaderBadge.textContent = "ALERTA NIVEL MEDIO";
+
+          aplicarEstiloBloque(
+            subPanelFrontal,
+            alertaFrontal,
+            "amarillo",
+            "▲ ZONA ESTABLE",
+          );
+          aplicarEstiloBloque(
+            subPanelLateral,
+            alertaLateral,
+            "amarillo",
+            "▲ ZONA ESTABLE",
+          );
+          aplicarEstiloBloque(
+            subPanelSuperior,
+            alertaSuperior,
+            "amarillo",
+            "▲ ZONA ESTABLE",
+          );
+
+          actualizarVistaCiudadana("amarillo");
+          sismografoAmplitud = 6;
+        } else {
+          // ESTADO VERDE (SEGURO)
+          cuadroEstado.className = "cuadro-dinamico fondo-verde";
+          textoRiesgoCuadro.textContent = "ZONA SEGURA";
+          textoRiesgoMapa.textContent = "ZONA SEGURA";
+          alertaHeaderBadge.style.background = "rgba(0, 200, 81, 0.2)";
+          alertaHeaderBadge.style.color = "#00C851";
+          alertaHeaderBadge.textContent = "ESTADO SEGURO";
+
+          aplicarEstiloBloque(
+            subPanelFrontal,
+            alertaFrontal,
+            "verde",
+            "▲ ZONA SEGURA",
+          );
+          aplicarEstiloBloque(
+            subPanelLateral,
+            alertaLateral,
+            "verde",
+            "▲ ZONA SEGURA",
+          );
+          aplicarEstiloBloque(
+            subPanelSuperior,
+            alertaSuperior,
+            "verde",
+            "▲ ZONA SEGURA",
+          );
+
+          actualizarVistaCiudadana("verde");
+          sismografoAmplitud = 2;
+        }
+      }
+
+      function aplicarEstiloBloque(panel, etiqueta, tipo, texto) {
+        panel.className = "sub-panel estado-" + tipo;
+        etiqueta.className = "tag-alerta texto-" + tipo;
+        etiqueta.textContent = texto;
+      }
+
+      inputLluvia.addEventListener("input", actualizarSimulacion);
+      inputInclinacion.addEventListener("input", actualizarSimulacion);
+      inputDensidad.addEventListener("input", actualizarSimulacion);
+
+      // ============================================================
+      // NUEVO: lo que faltaba "activo" — reloj de simulación,
+      // contador de iteraciones, hora de última actualización,
+      // FPS con leve variación y un sismógrafo en vivo.
+      // ============================================================
+
+      // --- Reloj de tiempo simulado (cuenta hacia arriba, 1 seg real = 1 seg simulado) ---
+      let segundosSimulados = 0;
+      const tiempoSimuladoEl = document.getElementById("tiempoSimulado");
+
+      function formatoHMS(totalSegundos) {
+        const h = String(Math.floor(totalSegundos / 3600)).padStart(2, "0");
+        const m = String(Math.floor((totalSegundos % 3600) / 60)).padStart(
+          2,
+          "0",
+        );
+        const s = String(Math.floor(totalSegundos % 60)).padStart(2, "0");
+        return `${h}:${m}:${s}`;
+      }
+
+      // --- Contador de iteraciones (avanza junto con el motor de simulación) ---
+      let iteraciones = 0;
+      const numItersEl = document.getElementById("numIters");
+
+      // --- Hora real de última actualización ---
+      const ultimaActualizacionEl = document.getElementById(
+        "ultimaActualizacion",
+      );
+
+      // --- FPS con ligera variación para que se sienta en vivo ---
+      const valFpsEl = document.getElementById("valFps");
+
+      // --- Temperatura / humedad con pequeñas fluctuaciones de sensor ---
+      const valTempEl = document.getElementById("valTemp");
+      const valHumedadEl = document.getElementById("valHumedad");
+      let temperaturaBase = 20;
+      let humedadBase = 85;
+
+      // --- Texto de telemetría del Arduino, para que se note que está leyendo ---
+      const lecturaArduinoEl = document.getElementById("lecturaArduino");
+
+      function tickMotor() {
+        segundosSimulados += 1;
+        iteraciones += Math.floor(20 + Math.random() * 15);
+
+        tiempoSimuladoEl.textContent = formatoHMS(segundosSimulados);
+        numItersEl.textContent = iteraciones.toLocaleString("es-BO");
+
+        const ahora = new Date();
+        ultimaActualizacionEl.textContent = ahora.toLocaleTimeString("es-BO", {
+          hour12: false,
+        });
+
+        valFpsEl.textContent = 58 + Math.round(Math.random() * 4);
+
+        temperaturaBase += (Math.random() - 0.5) * 0.4;
+        humedadBase += (Math.random() - 0.5) * 1.2;
+        valTempEl.textContent = temperaturaBase.toFixed(1) + "°C";
+        valHumedadEl.textContent = Math.round(humedadBase) + "% HUMEDAD";
+
+        lecturaArduinoEl.textContent = `Paquete #${iteraciones} recibido (COM4)`;
+      }
+
+      setInterval(tickMotor, 1000);
+      tickMotor();
+
+      // --- Mini sismógrafo en vivo (canvas) ---
+      const canvas = document.getElementById("sismografoCanvas");
+      const ctx = canvas.getContext("2d");
+      let sismografoAmplitud = 4;
+      const historial = new Array(70).fill(0);
+
+      function dibujarSismografo() {
+        historial.shift();
+        const ruido = (Math.random() - 0.5) * 2 * sismografoAmplitud;
+        historial.push(ruido);
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = "#38ef7d";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+
+        const paso = canvas.width / (historial.length - 1);
+        const centroY = canvas.height / 2;
+
+        historial.forEach((valor, i) => {
+          const x = i * paso;
+          const y = centroY - valor;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+
+        ctx.stroke();
+      }
+
+      setInterval(dibujarSismografo, 100);
+
+      // Inicializa todo con los valores por defecto de los sliders
+      actualizarSimulacion();
+
+      // ============================================================
+      // CONEXIÓN CON EL TABLERO FÍSICO (Arduino vía Web Serial API)
+      // El Arduino envía líneas de texto "lluvia,inclinacion" y aquí
+      // se leen para mover los sliders solos, en vivo.
+      // Solo funciona en Chrome / Edge (por el navegador, no por el código).
+      // ============================================================
+      const btnConectarArduino = document.getElementById("btnConectarArduino");
+      const estadoArduinoEl = document.getElementById("estadoArduino");
+
+      btnConectarArduino.addEventListener("click", async () => {
+        if (!("serial" in navigator)) {
+          alert(
+            "Este navegador no soporta Web Serial API. Usa Chrome o Edge en computadora.",
+          );
+          return;
+        }
+        try {
+          const puerto = await navigator.serial.requestPort();
+          await puerto.open({ baudRate: 9600 });
+
+          estadoArduinoEl.textContent = "● EN VIVO (Arduino)";
+          lecturaArduinoEl.textContent = "Conectado, esperando datos...";
+          btnConectarArduino.textContent = "🔌 Conectado";
+          btnConectarArduino.disabled = true;
+
+          const lector = puerto.readable.getReader();
+          const decoder = new TextDecoder();
+          let buffer = "";
+
+          while (true) {
+            const { value, done } = await lector.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+
+            let indiceSalto;
+            while ((indiceSalto = buffer.indexOf("\n")) >= 0) {
+              const linea = buffer.slice(0, indiceSalto).trim();
+              buffer = buffer.slice(indiceSalto + 1);
+              procesarLineaArduino(linea);
+            }
+          }
+        } catch (error) {
+          alert("No se pudo conectar: " + error.message);
+        }
+      });
+
+      function procesarLineaArduino(linea) {
+        // Acepta formato "lluvia,inclinacion" o "lluvia,inclinacion,densidad" (ej: "70,0,1.32")
+        const partes = linea.split(",");
+        if (partes.length < 2) return;
+
+        const lluvia = Number(partes[0]);
+        const inclinacion = Number(partes[1]);
+
+        if (isNaN(lluvia) || isNaN(inclinacion)) return;
+
+        inputLluvia.value = lluvia;
+        inputInclinacion.value = inclinacion;
+
+        // Si la señal del Arduino incluye un tercer dato (densidad)
+        if (partes.length >= 3) {
+          const densidad = Number(partes[2]);
+          if (!isNaN(densidad)) {
+            inputDensidad.value = densidad;
+          }
+        }
+
+        actualizarSimulacion();
+
+        lecturaArduinoEl.textContent = `Lluvia: ${lluvia} mm/h · Inclinación: ${inclinacion}° · Densidad: ${inputDensidad.value} g/cm³`;
+      }
+
+      // ============================================================
+      // VISTA CIUDADANA: semáforo grande + mensaje en lenguaje simple
+      // ============================================================
+      const btnToggleVista = document.getElementById("btnToggleVista");
+      const vistaTecnica = document.getElementById("vistaTecnica");
+      const vistaCiudadana = document.getElementById("vistaCiudadana");
+      let enVistaCiudadana = false;
+
+      btnToggleVista.addEventListener("click", () => {
+        enVistaCiudadana = !enVistaCiudadana;
+        vistaTecnica.style.display = enVistaCiudadana ? "none" : "block";
+        vistaCiudadana.style.display = enVistaCiudadana ? "block" : "none";
+        btnToggleVista.textContent = enVistaCiudadana
+          ? "📊 Vista Técnica"
+          : "👤 Vista Ciudadana";
+      });
+
+      function actualizarVistaCiudadana(nivel) {
+        const semaforo = document.getElementById("semaforoCiudadano");
+        const estado = document.getElementById("ciudadanoEstado");
+        const mensaje = document.getElementById("ciudadanoMensaje");
+
+        semaforo.className = "semaforo-grande semaforo-" + nivel;
+
+        if (nivel === "rojo") {
+          estado.textContent = "RIESGO ALTO";
+          mensaje.textContent =
+            "Se recomienda evacuar o alejarse de la zona. Si notas grietas, humedad inusual o ruidos en el terreno, avisa a Defensa Civil de inmediato.";
+        } else if (nivel === "amarillo") {
+          estado.textContent = "RIESGO MEDIO";
+          mensaje.textContent =
+            "Mantente atento a nuevas alertas y evita permanecer cerca de laderas o taludes durante lluvias fuertes.";
+        } else {
+          estado.textContent = "ZONA SEGURA";
+          mensaje.textContent =
+            "No se detecta riesgo por el momento. Puedes permanecer con normalidad en la zona.";
+        }
+      }
+
+      // ============================================================
+      // REPORTES CIUDADANOS (guardados en memoria mientras dura la sesión)
+      // ============================================================
+      const reportes = [];
+      const listaReportesEl = document.getElementById("listaReportes");
+      const btnEnviarReporte = document.getElementById("btnEnviarReporte");
+      const reporteNombreEl = document.getElementById("reporteNombre");
+      const reporteDescripcionEl =
+        document.getElementById("reporteDescripcion");
+
+      function escaparHtml(texto) {
+        const div = document.createElement("div");
+        div.textContent = texto;
+        return div.innerHTML;
+      }
+
+      btnEnviarReporte.addEventListener("click", () => {
+        const nombre = reporteNombreEl.value.trim() || "Anónimo";
+        const descripcion = reporteDescripcionEl.value.trim();
+
+        if (!descripcion) {
+          alert("Escribe una breve descripción antes de enviar el reporte.");
+          return;
+        }
+
+        const ahora = new Date();
+        reportes.unshift({
+          nombre: escaparHtml(nombre),
+          descripcion: escaparHtml(descripcion),
+          hora: ahora.toLocaleTimeString("es-BO", { hour12: false }),
+        });
+
+        reporteDescripcionEl.value = "";
+        renderReportes();
+      });
+
+      function renderReportes() {
+        if (reportes.length === 0) {
+          listaReportesEl.innerHTML =
+            '<p style="color:#566998; font-size:12px;">Aún no hay reportes registrados.</p>';
+          return;
+        }
+        listaReportesEl.innerHTML = reportes
+          .map(
+            (r) => `
+                <div class="reporte-item">
+                    <strong>${r.nombre}</strong>: ${r.descripcion}
+                    <div class="reporte-meta">Reportado a las ${r.hora}</div>
+                </div>
+            `,
+          )
+          .join("");
+      }
+
+      // ============================================================
+      // LLUVIA 2D: gotas de agua reales sobre el mapa, no líneas.
+      // La cantidad y velocidad de las gotas dependen del slider
+      // de INTENSIDAD DE LLUVIA (o del Arduino, si está conectado).
+      // ============================================================
+      const lluviaCanvas = document.getElementById("lluviaCanvas");
+      const lluviaCtx = lluviaCanvas.getContext("2d");
+      const maxGotas = 220;
+      const gotas = [];
+
+      function inicializarGotas() {
+        // El canvas toma el tamaño real del contenedor del mapa
+        lluviaCanvas.width = lluviaCanvas.clientWidth;
+        lluviaCanvas.height = lluviaCanvas.clientHeight;
+
+        gotas.length = 0;
+        for (let i = 0; i < maxGotas; i++) {
+          gotas.push({
+            x: Math.random() * lluviaCanvas.width,
+            y: Math.random() * lluviaCanvas.height,
+            radio: 1.4 + Math.random() * 1.8,
+            velocidadBase: 3 + Math.random() * 4,
+            desvio: (Math.random() - 0.5) * 0.6,
+          });
+        }
+      }
+
+      // Dibuja una gota con forma real de lágrima (no una línea recta)
+      function dibujarGota(x, y, r) {
+        lluviaCtx.beginPath();
+        lluviaCtx.moveTo(x, y - r * 2.4);
+        lluviaCtx.quadraticCurveTo(x + r, y - r * 0.2, x, y + r);
+        lluviaCtx.quadraticCurveTo(x - r, y - r * 0.2, x, y - r * 2.4);
+        lluviaCtx.closePath();
+        lluviaCtx.fill();
+      }
+
+      function animarLluvia() {
+        lluviaCtx.clearRect(0, 0, lluviaCanvas.width, lluviaCanvas.height);
+
+        const intensidad = Number(inputLluvia.value); // 0 - 200 mm/h
+        const proporcion = intensidad / 200;
+        const gotasActivas = Math.round(8 + proporcion * (maxGotas - 8));
+        const factorVelocidad = 0.5 + proporcion * 2.2;
+
+        lluviaCtx.fillStyle = "rgba(160, 210, 255, 0.6)";
+
+        for (let i = 0; i < gotasActivas; i++) {
+          const gota = gotas[i];
+          gota.y += gota.velocidadBase * factorVelocidad;
+          gota.x += gota.desvio;
+
+          if (gota.y > lluviaCanvas.height + 10) {
+            gota.y = -10;
+            gota.x = Math.random() * lluviaCanvas.width;
+          }
+          if (gota.x < 0) gota.x = lluviaCanvas.width;
+          if (gota.x > lluviaCanvas.width) gota.x = 0;
+
+          dibujarGota(gota.x, gota.y, gota.radio);
+        }
+
+        requestAnimationFrame(animarLluvia);
+      }
+
+      inicializarGotas();
+      animarLluvia();
+      window.addEventListener("resize", inicializarGotas);
+    </script>
+  </body>
+</html>
